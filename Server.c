@@ -1,80 +1,35 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-//"in" per "sockaddr_in"
 #include <netinet/in.h>
-//"fcntl" per la funzione "fcntl"
-#include <fcntl.h>
+#include <sys/socket.h>
+#include <stdio.h>
+#include "NetworkUtils.c"
+#include <string.h>
+#include <unistd.h>
 
-int CreaSocket(int Porta)
-{
-  int sock,errore;
-  struct sockaddr_in temp;
+#define PORT 1725
+#define MAX_DIM 512
+#define MAX_CONNECTIONS 4
 
-  //Creazione socket
-  sock=socket(AF_INET,SOCK_STREAM,0);
-  //Tipo di indirizzo
-  temp.sin_family=AF_INET;
-  temp.sin_addr.s_addr=INADDR_ANY;
-  temp.sin_port=htons(Porta);
+int main(int argc, char **argv) {
 
-  //Il socket deve essere non bloccante
-  errore=fcntl(sock,F_SETFL,O_NONBLOCK);
+	int ds_sock, sock_accept;
+	struct sockaddr client;
+	int length=sizeof(client);
+	char msg[MAX_DIM];
+	ds_sock=creaServerSocket(PORT, MAX_CONNECTIONS);
+	//printf("il valore del sock è: %d \n", ds_sock);
+	while(1){
+				while((sock_accept=accept(ds_sock,&client, &length))==-1);
+				do{
+				int num=read(sock_accept,msg,MAX_DIM);
+				//printf(" num invece è: %d \n", num);
+				msg[num-1]='\0';
+				msg[num]='\n';
+				write(1,msg,num+1);
 
-  //Bind del socket
-  errore=bind(sock,(struct sockaddr*) &temp,sizeof(temp));
-  //Per esempio, facciamo accettare fino a 7 richieste di servizio
-  //contemporanee (che finiranno nella coda delle connessioni).
-  errore=listen(sock,7);
+				}while(strcmp(msg,"exit")!=0);
+				chiudiSocket(sock_accept);
+				break;
+	}
+	return 0;
 
-  return sock;
-}
-
-void ChiudiSocket(int sock)
-{
-  close(sock);
-  return;
-}
-
-int main()
-{
-  //N.B. L'esempio non usa la funzione fork per far vedere l'utilizzo di
-  //     socket non bloccanti
-
-  char  buffer[512];
-  int DescrittoreSocket,NuovoSocket;
-  int exitCond=0;
-  int Quanti;
-
-  DescrittoreSocket=CreaSocket(1725);
-  printf("Server: Attendo connessioni...\n");
-  while (!exitCond)
-  {
-    //Test sul socket: accept non blocca, ma il ciclo while continua
-    //l'esecuzione fino all'arrivo di una connessione.
-    if ((NuovoSocket=accept(DescrittoreSocket,0,0))!=-1)
-    {
-      //Lettura dei dati dal socket (messaggio ricevuto)
-      if ((Quanti=read(NuovoSocket,buffer,sizeof(buffer)))<0)
-      {
-         printf("Impossibile leggere il messaggio.\n");
-         ChiudiSocket(NuovoSocket);
-      }
-      else
-      {
-         //Aggiusto la lunghezza...
-         buffer[Quanti]=0;
-         //Elaborazione dati ricevuti
-         if (strcmp(buffer,"exit")==0)
-              exitCond=1;
-         else printf("Server: %s \n",buffer);
-      }
-      //Chiusura del socket temporaneo
-      ChiudiSocket(NuovoSocket);
-    }
-  }
-  //Chiusura del socket
-  ChiudiSocket(DescrittoreSocket);
-  printf("Server: Terminato.\n");
-
-  return 0;
 }

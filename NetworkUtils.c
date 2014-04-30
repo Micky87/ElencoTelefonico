@@ -3,9 +3,30 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
+#include <string.h>
 
 //Crea una socket da un indirizzo e una porta, ritorna il valore della connect, -1 se errore
 
+int creaServerSocket(int Porta, int max_connections)
+{
+  int sock,errore;
+  struct sockaddr_in server;
+
+  //Creazione socket
+  sock=socket(AF_INET,SOCK_STREAM,0);
+  //Tipo di indirizzo
+  server.sin_family=AF_INET;
+  server.sin_addr.s_addr=INADDR_ANY;
+  server.sin_port=htons(Porta);
+
+  //Bind del socket
+  errore=bind(sock,(struct sockaddr*) &server,sizeof(server));
+  //Per esempio, facciamo accettare fino a 7 richieste di servizio
+  //contemporanee (che finiranno nella coda delle connessioni).
+  errore=listen(sock,max_connections);
+
+  return sock;
+}
 int crea_Socket(char* address, int port){
 	struct sockaddr_in client;
 	struct hostent *hp;
@@ -25,10 +46,5 @@ void chiudiSocket(int des){
 
 int inviaMessaggio(int sock, char* messaggio, int mlength){
 	return write(sock, messaggio, mlength);
-}
-int main(int argc, char **argv) {
-
-	int des=crea_Socket("127.0.0.1", 1725);
-	inviaMessaggio(des, "Ciao", 4);
 }
 

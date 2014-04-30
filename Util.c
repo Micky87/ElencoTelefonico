@@ -1,42 +1,81 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
+#define STD_INPUT 0
+#define STD_OUTPUT 1
 #define RUBRICA "rubrica.txt"
-#define BUFSIZE 128
+#define NAME_SIZE 15
+#define COGNOME_SIZE 15
+#define TELEFONO_SIZE 15
+#define DOM1_SIZE 16
+#define DOM2_SIZE 19
+#define DOM3_SIZE 20
+#define DOM1 "Inserisci nome: "
+#define DOM2 "Inserisci cognome: "
+#define DOM3 "Inserisci telefono: "
+#define DIM_ARRAY 10
+
 typedef struct {
-	char* nome, cognome, telefono;
+	char nome[NAME_SIZE];
+	char cognome[COGNOME_SIZE];
+	char telefono[TELEFONO_SIZE];
 }record;
 
 
-int creaRubrica() {
-	if(!creat(RUBRICA,O_CREAT|0666))
-		printf("Errore nella creat");
-	return 0;
-}
-int aggiungiRecord(record r){
-	int id=open(RUBRICA, O_WRONLY,0666);
-		if(id==-1) printf("Errore nell'apertura");
-	printf("Riga 22");
-	char buffer[BUFSIZE];
+void copiaValore(char* dest, char* sorg){
+	//Copia una stringa da sorgente a destinazione aggiungendo il terminatore come strcpy
 	int i=0;
-	printf("Riga 24");
-	while(&r.nome[i]!="\0"){
-		buffer[i]=r.nome[i];
+	while(sorg[i]!='\0'){
+		dest[i]=sorg[i];
 		i++;
 	}
-		return 0;
-}
-void main(int argc, char **argv) {
-	printf("Riga 33");
-	creaRubrica();
-	record r;
-	printf("Riga 35");
-	r.nome="Marco";
-	strcpy(r.nome, "Marco");
-	aggiungiRecord(r);
+	dest[i]='\0';
 
+}
+
+void prendiDaTastiera(int id, record* r){
+		write(STD_OUTPUT, DOM1, DOM1_SIZE);
+		int length=read(STD_INPUT, r->nome, NAME_SIZE-1);
+		r->nome[length-2]=' ';
+		r->nome[length-1]='\n';
+		r->nome[length]='\0';
+		write(id,r->nome,length);
+		write(STD_OUTPUT, DOM2,DOM2_SIZE);
+		length=read(STD_INPUT, r->cognome, COGNOME_SIZE-1);
+		r->cognome[length-2]=' ';
+		r->cognome[length-1]='\n';
+		r->cognome[length]='\0';
+		write(id, r->cognome, length);
+		write(STD_OUTPUT, DOM3,DOM3_SIZE);
+		length=read(STD_INPUT, r->telefono, TELEFONO_SIZE-1);
+		write(id, r->telefono, length);
+		r->telefono[length-2]=' ';
+		r->telefono[length-1]='\n';
+		r->telefono[length]='\0';
+
+
+}
+//void popolaArray(int id, record array[]){
+//	int j=0;int i=0;int res;
+//	do{
+
+//	}while(res!=0);
+
+
+
+//}
+
+int main(int argc, char **argv) {
+	int ds_file=open(RUBRICA,O_CREAT|0666);
+	record* array[10];
+	//popolaArray(ds_file, array );
+	int i = 0;
+	while(i<3)
+	{
+		printf("%s \n",(array[i])->nome);
+		printf("%s \n",(array[i])->cognome);
+		printf("%s \n",(array[i])->telefono);
+	}
 }
 
