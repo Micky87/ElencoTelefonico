@@ -1,7 +1,6 @@
 #include <unistd.h>
 #include <fcntl.h>
-#include <stdio.h>
-
+#include <stdio.h>c"
 #define STD_INPUT 0
 #define STD_OUTPUT 1
 #define RUBRICA "rubrica.txt"
@@ -37,14 +36,12 @@ void copiaValore(char* dest, char* sorg){
 void prendiDaTastiera(int id, record* r){
 		write(STD_OUTPUT, DOM1, DOM1_SIZE);
 		int length=read(STD_INPUT, r->nome, NAME_SIZE-1);
-		r->nome[length-2]=' ';
-		r->nome[length-1]='\n';
+		r->nome[length-1]=' ';
 		r->nome[length]='\0';
 		write(id,r->nome,length);
 		write(STD_OUTPUT, DOM2,DOM2_SIZE);
 		length=read(STD_INPUT, r->cognome, COGNOME_SIZE-1);
-		r->cognome[length-2]=' ';
-		r->cognome[length-1]='\n';
+		r->cognome[length-1]=' ';
 		r->cognome[length]='\0';
 		write(id, r->cognome, length);
 		write(STD_OUTPUT, DOM3,DOM3_SIZE);
@@ -67,15 +64,8 @@ void prendiDaTastiera(int id, record* r){
 //}
 
 int main(int argc, char **argv) {
-	int ds_file=open(RUBRICA,O_CREAT|0666);
-	record* array[10];
-	//popolaArray(ds_file, array );
-	int i = 0;
-	while(i<3)
-	{
-		printf("%s \n",(array[i])->nome);
-		printf("%s \n",(array[i])->cognome);
-		printf("%s \n",(array[i])->telefono);
-	}
+	int ds_file=open(RUBRICA,O_RDWR|O_CREAT|O_APPEND,0666);
+	record r;
+	prendiDaTastiera(ds_file, &r);
 }
 
